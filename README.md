@@ -6,5 +6,6 @@
 Drag Gears folder into server resources directory and write start Gears in your server.cfg if you nee any support join my discord.
 
 # Preview
-![image](https://user-images.githubusercontent.com/86536434/141681404-d4c04f28-f551-4665-aeb9-012ff2dc7acd.png)
 Video: https://youtu.be/sJTOAJGDzNs
+![image](https://user-images.githubusercontent.com/86536434/141681404-d4c04f28-f551-4665-aeb9-012ff2dc7acd.png)
+
