@@ -8,6 +8,7 @@
 
 gearText = config.Ptext
 gear = 1
+toggle = GetResourceKvpInt("gears")
 
 function SetGear(gearOption)
     spd = GetEntitySpeed(veh) * 2.236936
@@ -76,20 +77,32 @@ end
 
 Citizen.CreateThread(function()
     while true do
+        Citizen.Wait(50)
+        if toggle == 1 then
+            ped = PlayerPedId()
+            veh = GetVehiclePedIsIn(ped, false)
+            inVeh = IsPedInVehicle(ped, veh, false)
+            
+            if inVeh then
+                SetGear(gear)
+            end
+        end
+    end
+end)
+
+Citizen.CreateThread(function()
+    while true do
         Citizen.Wait(0)
-        ped = PlayerPedId()
-        veh = GetVehiclePedIsIn(ped, false)
-        inVeh = IsPedInVehicle(ped, veh, false)
-        
-        if inVeh then
-            SetGear(gear)
-            Text(gearText, config.textX, config.textY, config.textScale)
+        if toggle == 1 then
+            if inVeh then
+                Text(gearText, config.textX, config.textY, config.textScale)
+            end
         end
     end
 end)
 
 RegisterCommand('+gear1', function()
-    if inVeh then
+    if inVeh and toggle == 1 then
         if gear == 1 then
             gear = gear
         else
@@ -98,7 +111,7 @@ RegisterCommand('+gear1', function()
     end
 end, false)
 RegisterCommand('+gear2', function()
-    if inVeh then
+    if inVeh and toggle == 1 then
         if gear == 5 then
             gear = gear
         else
@@ -109,6 +122,17 @@ end, false)
 
 RegisterKeyMapping('+gear1', 'Change Gear (up)', 'keyboard', 'pageup')
 RegisterKeyMapping('+gear2', 'Change Gear (down)', 'keyboard', 'pagedown')
+
+RegisterCommand("gears", function(source, args, rawCommand)
+    if toggle == 1 then
+        SetResourceKvpInt("gears", 0)
+    else
+        SetResourceKvpInt("gears", 1)
+    end
+    toggle = GetResourceKvpInt("gears")
+end, false)
+
+TriggerEvent('chat:addSuggestion', '/gears', 'Toggle Gears', {})
 
 function Text(text, x, y, scale)
     SetTextFont(4)
