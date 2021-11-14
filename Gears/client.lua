@@ -77,7 +77,7 @@ end
 
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(50)
+        Citizen.Wait(5)
         if toggle == 1 then
             ped = PlayerPedId()
             veh = GetVehiclePedIsIn(ped, false)
