@@ -120,6 +120,9 @@ RegisterCommand('+gear2', function()
     end
 end, false)
 
+RegisterCommand('-gear1', function()end, false)
+RegisterCommand('-gear2', function()end, false)
+
 RegisterKeyMapping('+gear1', 'Change Gear (up)', 'keyboard', 'pageup')
 RegisterKeyMapping('+gear2', 'Change Gear (down)', 'keyboard', 'pagedown')
 
