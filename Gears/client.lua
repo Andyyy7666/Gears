@@ -15,23 +15,45 @@ function SetGear(gearOption)
     rpm = GetVehicleCurrentRpm(veh)
     if gearOption == 1 then
         gearText = config.Ptext
-        SetVehicleHandbrake(veh, true)
+        if spd < 3.0 then
+            SetVehicleHandbrake(veh, true)
+        else
+            DisableControlAction(0, 71, true) -- W
+            SetControlNormal(0, 72, 1.0) -- S
+        end
     else
         SetVehicleHandbrake(veh, false)
     end
     if gearOption == 2 then
         gearText = config.Rtext
-        if IsControlPressed(0, 72) or IsControlPressed(0, 71) or IsControlPressed(0, 133) or IsControlPressed(0, 134) then -- S
-            SetVehicleControlsInverted(veh, true)
-        else
+        driving = GetEntitySpeedVector(veh, true)
+        if driving.y > 0.1 and spd > 5.0 then
+            DisableControlAction(0, 71, true) -- W
             SetVehicleControlsInverted(veh, false)
+        else
+            if not IsControlPressed(0, 72) then -- W
+                if config.enableCarAutoRollOnDrive then
+                    SetControlNormal(0, 72, 0.3)
+                    --SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), -1.5)
+                end
+            end
+            if IsControlPressed(0, 72) or IsControlPressed(0, 71) or IsControlPressed(0, 133) or IsControlPressed(0, 134) then -- S
+                SetVehicleControlsInverted(veh, true)
+                SetControlNormal(0, 72, 0.0)
+                SetControlNormal(0, 71, 0.3)
+            else
+                SetVehicleControlsInverted(veh, false)
+            end
+            if spd < 1.0 and IsControlPressed(0, 72) then
+                SetVehicleCurrentRpm(veh, rpm - rpm)
+                SetVehicleBrake(veh, true)
+                SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), 0)
+            end
         end
-        if spd < 1.0 and IsControlPressed(0, 72) then
-            SetVehicleCurrentRpm(veh, rpm - rpm)
-            SetVehicleBrake(veh, true)
-            SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), 0)
-        end
-    elseif gearOption == 3 then
+    else
+        SetVehicleControlsInverted(veh, false)
+    end
+    if gearOption == 3 then
         SetVehicleControlsInverted(veh, false)
         gearText = config.Ntext
         DisableControlAction(0, 71, true) -- W
@@ -44,11 +66,12 @@ function SetGear(gearOption)
         SetVehicleControlsInverted(veh, false)
         gearText = config.Dtext
         if not IsControlPressed(0, 71) then -- W
-            if (spd < 3.5) and (not IsControlPressed(0, 72)) and config.enableCarAutoRollOnDrive then
-                SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), 1.5)
+            if config.enableCarAutoRollOnDrive then
+                SetControlNormal(0, 71, 0.3)
             end
         end
         if spd < 1.0 and IsControlPressed(0, 72) then
+            SetControlNormal(0, 71, 0.8)
             SetVehicleCurrentRpm(veh, rpm - rpm)
             SetVehicleBrake(veh, true)
             SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), 0)
@@ -57,17 +80,18 @@ function SetGear(gearOption)
         SetVehicleControlsInverted(veh, false)
         gearText = config.Stext
         if not IsControlPressed(0, 71) then -- W
-            if (spd < 3.5) and (not IsControlPressed(0, 72)) and config.enableCarAutoRollOnDrive then
-                SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), 1.5)
+            if config.enableCarAutoRollOnDrive then
+                SetControlNormal(0, 71, 0.3)
             end
         else
-            if spd > 3.5 then
+            if spd > 10 then
                 SetVehicleCurrentRpm(veh, rpm - 0.002)
                 SetVehicleCurrentRpm(veh, rpm + 0.01)
                 SetVehicleCheatPowerIncrease(veh, 2.0)
             end
         end
         if spd < 1.0 and IsControlPressed(0, 72) then
+            SetControlNormal(0, 71, 0.8)
             SetVehicleCurrentRpm(veh, rpm - rpm)
             SetVehicleBrake(veh, true)
             SetVehicleForwardSpeed(GetVehiclePedIsIn(ped, false), 0)
@@ -101,7 +125,7 @@ Citizen.CreateThread(function()
     end
 end)
 
-RegisterCommand('+gear1', function()
+RegisterCommand("+gear1", function()
     if inVeh and toggle == 1 then
         if gear == 1 then
             gear = gear
@@ -110,7 +134,7 @@ RegisterCommand('+gear1', function()
         end
     end
 end, false)
-RegisterCommand('+gear2', function()
+RegisterCommand("+gear2", function()
     if inVeh and toggle == 1 then
         if gear == 5 then
             gear = gear
@@ -120,11 +144,11 @@ RegisterCommand('+gear2', function()
     end
 end, false)
 
-RegisterCommand('-gear1', function()end, false)
-RegisterCommand('-gear2', function()end, false)
+RegisterCommand("-gear1", function()end, false)
+RegisterCommand("-gear2", function()end, false)
 
-RegisterKeyMapping('+gear1', 'Change Gear (up)', 'keyboard', 'pageup')
-RegisterKeyMapping('+gear2', 'Change Gear (down)', 'keyboard', 'pagedown')
+RegisterKeyMapping("+gear1", "Change Gear (up)", "keyboard", "pageup")
+RegisterKeyMapping("+gear2", "Change Gear (down)", "keyboard", "pagedown")
 
 RegisterCommand("gears", function(source, args, rawCommand)
     if toggle == 1 then
@@ -135,7 +159,7 @@ RegisterCommand("gears", function(source, args, rawCommand)
     toggle = GetResourceKvpInt("gears")
 end, false)
 
-TriggerEvent('chat:addSuggestion', '/gears', 'Toggle Gears', {})
+TriggerEvent("chat:addSuggestion", "/gears", "Toggle Gears", {})
 
 function Text(text, x, y, scale)
     SetTextFont(4)
